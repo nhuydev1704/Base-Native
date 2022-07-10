@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, NavigationContainer } from "@react-navigation/native"
 import React from "react"
-import { StyleSheet, TouchableOpacity, useColorScheme, View } from "react-native"
+import { StyleSheet, Text, TouchableOpacity, useColorScheme, View } from "react-native"
 import { navigationRef, useBackButtonHandler } from "./navigation-utilities"
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
@@ -30,73 +30,75 @@ const BottomTabArr = [
     route: "home",
     label: "Home",
     type: IconsLibraries.Ionicons,
-    activeIcon: "grid",
-    inActiveIcon: "grid-outline",
+    icon: "grid-outline",
     component: HomeScreen,
+    color: Colors.primary,
+    alphaClr: Colors.primaryAlpha,
   },
   {
     route: "setting",
     label: "Like",
     type: IconsLibraries.Ionicons,
-    activeIcon: "settings",
-    inActiveIcon: "settings-outline",
+    icon: "settings-outline",
     component: SettingsScreen,
+    color: Colors.green,
+    alphaClr: Colors.greenAlpha,
   },
 ]
 
 // bottom tab
 
 const Tab = createBottomTabNavigator<NavigatorBottomParamList>()
-const animate1 = {
-  0: { scale: 0.5, translateY: 7 },
-  0.92: { translateY: -34 },
-  1: { scale: 1.2, translateY: -24 },
-}
-const animate2 = { 0: { scale: 1.2, translateY: -24 }, 1: { scale: 1, translateY: 7 } }
-
-const circle1 = {
-  0: { scale: 0 },
-  0.3: { scale: 0.3 },
-  0.5: { scale: 0.5 },
-  0.8: { scale: 0.7 },
-  1: { scale: 1 },
-}
-const circle2 = { 0: { scale: 1 }, 1: { scale: 0 } }
 
 const TabButton = (props: any) => {
   const { item, onPress, accessibilityState } = props
   const focused = accessibilityState.selected
   const viewRef = React.useRef(null)
-  const circleRef = React.useRef(null)
-  const textRef = React.useRef(null)
+  const textViewRef = React.useRef(null)
 
   React.useEffect(() => {
     if (focused) {
-      viewRef.current.animate(animate1)
-      circleRef.current.animate(circle1)
-      textRef.current.transitionTo({ scale: 1 })
+      // 0.3: { scale: .7 }, 0.5: { scale: .3 }, 0.8: { scale: .7 },
+      viewRef.current.animate({ 0: { scale: 0 }, 1: { scale: 1 } })
+      textViewRef.current.animate({ 0: { scale: 0 }, 1: { scale: 1 } })
     } else {
-      viewRef.current.animate(animate2)
-      circleRef.current.animate(circle2)
-      textRef.current.transitionTo({ scale: 0 })
+      viewRef.current.animate({ 0: { scale: 1 }, 1: { scale: 0 } })
+      textViewRef.current.animate({ 0: { scale: 1 }, 1: { scale: 0 } })
     }
   }, [focused])
 
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={1} style={styles.container}>
-      <Animatable.View ref={viewRef} duration={500} style={styles.container}>
-        <View style={styles.btn}>
-          <Animatable.View ref={circleRef} style={styles.circle} />
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={1}
+      style={[styles.container, { flex: focused ? 1 : 0.65 }]}
+    >
+      <View>
+        <Animatable.View
+          duration={400}
+          ref={viewRef}
+          style={[StyleSheet.absoluteFillObject, { backgroundColor: item.color, borderRadius: 16 }]}
+        />
+        <View style={[styles.btn, { backgroundColor: focused ? null : item.alphaClr }]}>
           <IconSvg
             type={item.type}
-            name={item.inActiveIcon}
+            name={item.icon}
             color={focused ? Colors.white : Colors.primary}
           />
+          <Animatable.View duration={300} ref={textViewRef}>
+            {focused && (
+              <Text
+                style={{
+                  color: Colors.white,
+                  paddingHorizontal: 8,
+                }}
+              >
+                {item.label}
+              </Text>
+            )}
+          </Animatable.View>
         </View>
-        <Animatable.Text ref={textRef} style={styles.text}>
-          {item.label}
-        </Animatable.Text>
-      </Animatable.View>
+      </View>
     </TouchableOpacity>
   )
 }
@@ -106,7 +108,14 @@ const BottomStack = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarStyle: styles.tabBar,
+        tabBarStyle: {
+          height: 60,
+          position: "absolute",
+          bottom: 16,
+          right: 16,
+          left: 16,
+          borderRadius: 16,
+        },
       }}
     >
       {BottomTabArr.map((item, index) => {
@@ -165,38 +174,13 @@ export const canExit = (routeName: string) => exitRoutes.includes(routeName)
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  tabBar: {
-    height: 70,
-    position: "absolute",
-    bottom: 16,
-    right: 16,
-    left: 16,
-    borderRadius: 16,
   },
   btn: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    borderWidth: 4,
-    borderColor: Colors.white,
-    backgroundColor: Colors.white,
-    justifyContent: "center",
+    flexDirection: "row",
     alignItems: "center",
-  },
-  circle: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.primary,
-    borderRadius: 25,
-  },
-  text: {
-    fontSize: 10,
-    textAlign: "center",
-    color: Colors.primary,
+    padding: 8,
+    borderRadius: 16,
   },
 })
