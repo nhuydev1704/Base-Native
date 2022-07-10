@@ -1,25 +1,23 @@
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { DarkTheme, DefaultTheme, NavigationContainer } from "@react-navigation/native"
-import AnimatedLottieView from "lottie-react-native"
 import React from "react"
-import { StyleSheet, TouchableOpacity, useColorScheme, View } from "react-native"
-import { HomeScreen } from "../screens"
-import lotties from "../theme/lotties"
+import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
 import { navigationRef, useBackButtonHandler } from "./navigation-utilities"
-import {
-  AvtiveButtonStyled,
-  container,
-  IconButtonCenter,
-  TabarStyled,
-  TouchStyled,
-  ViewButtonCenterStyled,
-  ViewButtonStyled,
-} from "./style"
 
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import { HomeScreen, SettingsScreen } from "../screens"
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
+import { IconsLibraries, IconSvg } from "../components/icon-svg/icon-svg"
 import * as Animatable from "react-native-animatable"
-import SearchScreen from "../screens/search"
-
+import Colors from "../constants/Colors"
 export type NavigatorParamList = {
+  tab: undefined
+  search: undefined
+  detail: undefined
+  noti: undefined
+  setting: undefined
+}
+
+export type NavigatorBottomParamList = {
   home: undefined
   search: undefined
   detail: undefined
@@ -27,109 +25,106 @@ export type NavigatorParamList = {
   setting: undefined
 }
 
-interface IProps {
-  children: React.ReactNode
-  onPress?: any
-  accessibilityState?: any
-}
+const BottomTabArr = [
+  {
+    route: "home",
+    label: "Home",
+    type: IconsLibraries.Ionicons,
+    activeIcon: "grid",
+    inActiveIcon: "grid-outline",
+    component: HomeScreen,
+  },
+  {
+    route: "setting",
+    label: "Like",
+    type: IconsLibraries.Ionicons,
+    activeIcon: "settings",
+    inActiveIcon: "settings-outline",
+    component: SettingsScreen,
+  },
+]
 
-const CustomTabarButtonCenter: React.FC<IProps> = ({ children, onPress }) => (
-  <TouchableOpacity style={{ ...TouchStyled, ...styles.shadow }} onPress={onPress}>
-    <View style={ViewButtonCenterStyled}>{children}</View>
-  </TouchableOpacity>
-)
+// bottom tab
 
-const CustomTabarButton: React.FC<IProps> = ({ children, onPress, accessibilityState }) => {
+const Tab = createBottomTabNavigator<NavigatorBottomParamList>()
+
+const TabButton = (props: any) => {
+  const { item, onPress, accessibilityState } = props
+  const focused = accessibilityState.selected
   const viewRef = React.useRef(null)
-  const active = accessibilityState.selected
 
   React.useEffect(() => {
-    if (active) {
-      viewRef.current.animate({ 0: { scale: 0.5 }, 1: { scale: 1 } })
+    if (focused) {
+      viewRef.current.animate({
+        0: { scale: 0.5, rotate: "0deg" },
+        1: { scale: 1.5, rotate: "360deg" },
+      })
+    } else {
+      viewRef.current.animate({
+        0: { scale: 1.5, rotate: "360deg" },
+        1: { scale: 1, rotate: "0deg" },
+      })
     }
-  }, [active])
+  }, [focused])
 
   return (
-    <TouchableOpacity activeOpacity={1} style={container} onPress={onPress}>
-      <Animatable.View ref={viewRef} style={container}>
-        {children}
+    <TouchableOpacity onPress={onPress} activeOpacity={1} style={styles.container}>
+      <Animatable.View ref={viewRef} duration={1000} style={styles.container}>
+        <IconSvg
+          type={item.type}
+          name={focused ? item.activeIcon : item.inActiveIcon}
+          color={focused ? Colors.primary : Colors.primaryLite}
+        />
       </Animatable.View>
     </TouchableOpacity>
   )
 }
 
-const Tab = createBottomTabNavigator<NavigatorParamList>()
-
-const RenderTabarButton = ({ active, src }) => {
-  return (
-    <View>
-      <View style={active && AvtiveButtonStyled}>
-        <View style={ViewButtonStyled}>
-          <AnimatedLottieView source={src} autoPlay loop={false} />
-        </View>
-      </View>
-    </View>
-  )
-}
-
-const AppStack = () => {
+const BottomStack = () => {
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
-        tabBarShowLabel: false,
         tabBarStyle: {
-          ...TabarStyled,
-          ...styles.shadow,
+          height: 60,
+          position: "absolute",
+          bottom: 16,
+          right: 16,
+          left: 16,
+          borderRadius: 16,
         },
       }}
-      initialRouteName="home"
     >
-      <Tab.Screen
-        options={{
-          tabBarIcon: ({ focused }) => <RenderTabarButton active={focused} src={lotties.home} />,
-          tabBarButton: (props) => <CustomTabarButton {...props} />,
-        }}
-        name="home"
-        component={HomeScreen}
-      />
-      <Tab.Screen
-        options={{
-          tabBarIcon: ({ focused }) => <RenderTabarButton active={focused} src={lotties.search} />,
-          tabBarButton: (props) => <CustomTabarButton {...props} />,
-        }}
-        name="search"
-        component={SearchScreen}
-      />
-      <Tab.Screen
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View style={IconButtonCenter}>
-              <AnimatedLottieView source={lotties.plus} autoPlay loop={true} />
-            </View>
-          ),
-          tabBarButton: (props) => <CustomTabarButtonCenter {...props} />,
-        }}
-        name="detail"
-        component={HomeScreen}
-      />
-      <Tab.Screen
-        options={{
-          tabBarIcon: ({ focused }) => <RenderTabarButton active={focused} src={lotties.todo} />,
-          tabBarButton: (props) => <CustomTabarButton {...props} />,
-        }}
-        name="noti"
-        component={HomeScreen}
-      />
-      <Tab.Screen
-        options={{
-          tabBarIcon: ({ focused }) => <RenderTabarButton active={focused} src={lotties.setting} />,
-          tabBarButton: (props) => <CustomTabarButton {...props} />,
-        }}
-        name="setting"
-        component={HomeScreen}
-      />
+      {BottomTabArr.map((item, index) => {
+        return (
+          <Tab.Screen
+            key={index}
+            name={item.route}
+            component={item.component}
+            options={{
+              tabBarShowLabel: false,
+              tabBarButton: (props) => <TabButton {...props} item={item} />,
+            }}
+          />
+        )
+      })}
     </Tab.Navigator>
+  )
+}
+
+// stack
+const Stack = createNativeStackNavigator<NavigatorParamList>()
+
+const AppStack = () => {
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+      initialRouteName="tab"
+    >
+      <Stack.Screen name="tab" component={BottomStack} />
+    </Stack.Navigator>
   )
 }
 
@@ -153,16 +148,11 @@ AppNavigator.displayName = "AppNavigator"
 
 const exitRoutes = ["home"]
 export const canExit = (routeName: string) => exitRoutes.includes(routeName)
-const color = "#7F5DF0"
+
 const styles = StyleSheet.create({
-  shadow: {
-    elevation: 5,
-    shadowColor: color,
-    shadowOffset: {
-      width: 0,
-      height: 10,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.5,
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 })
