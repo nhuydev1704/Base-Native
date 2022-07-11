@@ -93,7 +93,7 @@ const platformCommand = Platform.select({
   android: "Cmd/Ctrl + M",
 })
 
-export const DemoScreen: FC<StackScreenProps<NavigatorParamList, "demo">> = observer(
+export const DemoScreen: FC<StackScreenProps<NavigatorParamList, "login">> = observer(
   ({ navigation }) => {
     const goBack = () => navigation.goBack()
 

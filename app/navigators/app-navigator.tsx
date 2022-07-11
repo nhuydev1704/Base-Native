@@ -18,6 +18,9 @@ import {
 
 import * as Animatable from "react-native-animatable"
 import SearchScreen from "../screens/search"
+import { createNativeStackNavigator } from "@react-navigation/native-stack"
+import { LoginScreen } from "../screens/login/login-screen"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 export type NavigatorParamList = {
   home: undefined
@@ -45,19 +48,20 @@ const CustomTabarButton: React.FC<IProps> = ({ children, onPress, accessibilityS
 
   React.useEffect(() => {
     if (active) {
-      viewRef.current.animate({ 0: { scale: 0.5 }, 1: { scale: 1 } })
+      viewRef.current.animate({ 0: { scale: 1 }, 0.5: { scale: 1.15 }, 1: { scale: 1.25 } })
     }
   }, [active])
 
   return (
     <TouchableOpacity activeOpacity={1} style={container} onPress={onPress}>
-      <Animatable.View ref={viewRef} style={container}>
+      <Animatable.View duration={500} ref={viewRef} style={container}>
         {children}
       </Animatable.View>
     </TouchableOpacity>
   )
 }
 
+// bottom tab
 const Tab = createBottomTabNavigator<NavigatorParamList>()
 
 const RenderTabarButton = ({ active, src }) => {
@@ -72,7 +76,7 @@ const RenderTabarButton = ({ active, src }) => {
   )
 }
 
-const AppStack = () => {
+const Tabtack = () => {
   return (
     <Tab.Navigator
       screenOptions={{
@@ -103,7 +107,7 @@ const AppStack = () => {
       />
       <Tab.Screen
         options={{
-          tabBarIcon: ({ focused }) => (
+          tabBarIcon: () => (
             <View style={IconButtonCenter}>
               <AnimatedLottieView source={lotties.plus} autoPlay loop={true} />
             </View>
@@ -133,6 +137,40 @@ const AppStack = () => {
   )
 }
 
+export type AppNavigatorParamList = {
+  login: undefined
+  tab: undefined
+}
+
+const Stack = createNativeStackNavigator<AppNavigatorParamList>()
+
+// stack navigator
+const AppStackNavigator = () => {
+  const [initialRoute, setInitialRoute] = React.useState<keyof AppNavigatorParamList>("login")
+
+  React.useEffect(() => {
+    ;(async () => {
+      const firstLogin = await AsyncStorage.getItem("firstLogin")
+      if (firstLogin) {
+        setInitialRoute("tab")
+      }
+    })()
+  }, [])
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}
+      initialRouteName={initialRoute}
+    >
+      <Stack.Screen name="tab" component={Tabtack} />
+      <Stack.Screen name="login" component={LoginScreen} />
+    </Stack.Navigator>
+  )
+}
+
+// stack container
 interface NavigationProps extends Partial<React.ComponentProps<typeof NavigationContainer>> {}
 
 export const AppNavigator = (props: NavigationProps) => {
@@ -144,7 +182,7 @@ export const AppNavigator = (props: NavigationProps) => {
       theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
       {...props}
     >
-      <AppStack />
+      <AppStackNavigator />
     </NavigationContainer>
   )
 }

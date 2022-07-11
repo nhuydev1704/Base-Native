@@ -1,4 +1,6 @@
 rootProject.name = 'WorkFlow'
+include ':react-native-pager-view'
+project(':react-native-pager-view').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-pager-view/android')
 
 // This method of including other gradle files is to support symlinks.
 apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute().text.trim(), "../scripts/autolinking.gradle");

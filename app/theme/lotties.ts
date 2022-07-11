@@ -3,6 +3,7 @@ const lotties = {
   plus: require("./lotties/plus.json"),
   search: require("./lotties/search.json"),
   setting: require("./lotties/setting.json"),
+  team: require("./lotties/team.json"),
   todo: require("./lotties/todo.json"),
   user: require("./lotties/user.json"),
 }

@@ -14,7 +14,7 @@ export const TabarStyled: ViewStyle = {
   elevation: 0,
   backgroundColor: "white",
   borderRadius: 15,
-  height: 70,
+  height: 60,
 }
 
 export const ViewButtonCenterStyled = {
@@ -23,16 +23,16 @@ export const ViewButtonCenterStyled = {
   width: 60,
 }
 
-export const ViewButtonStyled: ViewStyle = { width: 35, height: 35 }
+export const ViewButtonStyled: ViewStyle = { width: 30, height: 30 }
 
 export const AvtiveButtonStyled: ViewStyle = {
   backgroundColor: "#E9E9EB",
   borderRadius: 50,
-  padding: 6,
+  padding: 2,
 }
 
 export const IconButtonCenter: ViewStyle = {
-  padding: 40,
+  padding: 36,
 }
 
 export const container: ViewStyle = { flex: 1, justifyContent: "center", alignItems: "center" }

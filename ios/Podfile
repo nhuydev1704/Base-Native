@@ -9,6 +9,8 @@ install! 'cocoapods', :deterministic_uuids => false
 
 target 'WorkFlow' do
   use_expo_modules!
+  pod 'react-native-pager-view', :path => '../node_modules/react-native-pager-view'
+
   post_integrate do |installer|
     begin
       expo_patch_react_imports!(installer)
